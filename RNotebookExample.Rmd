@@ -1,0 +1,69 @@
+---
+output_dir: "."
+title: "Untitled"
+author: "Jane Murphy"
+output: html_document
+---
+
+```{r load-data, message = FALSE, echo=FALSE}
+library(tidyverse)
+library(kableExtra) # used for kbl()
+pop_data <- read_csv("data/gapminder_data.csv")
+
+euro_data_tbl <- pop_data %>% 
+  filter(continent == "Europe" & year == 2007) %>% 
+  select(-continent, -year) %>% 
+  arrange(desc(lifeExp)) %>% 
+  rename(Country = country, 
+         Population = pop, 
+         "Life expectancy" = lifeExp, 
+         "GDP per capita" = gdpPercap)
+
+```
+
+<!-- message=FALSE doesn't represent messages created by code -->
+
+The results in euro_data_tbl are in the table below:
+
+```{r kbl, echo=FALSE}
+euro_data_tbl %>% 
+  kbl() %>% 
+  kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE) %>% 
+  scroll_box(width = "100%", height = "200px")
+```
+```{r paged-table}
+library(rmarkdown)
+paged_table(euro_data_tbl)
+```
+```{r figure}
+euro_data_fig <- pop_data %>% 
+  filter(continent == "Europe")
+
+euro_plot <- euro_data_fig %>% 
+  ggplot(aes(x = factor(year), y = lifeExp))+
+  geom_violin() +
+  ylim (0,90) +
+  stat_summary(fun = median, geom="point") +
+  theme_bw()
+```
+
+
+```{r uk_data_fig, message = FALSE}
+library(ggpubr)
+uk_data_fig <- pop_data %>% 
+  filter(country == "United Kingdom")
+
+uk_plot <- uk_data_fig %>% 
+  ggplot(aes(x=factor(year), y=lifeExp)) +
+  geom_point() +
+  ylim(0,90) +
+  theme_bw()
+
+ggarrange(euro_plot, uk_plot, nrow = 1, ncol = 2, labels = c("A", "B")) #for A,B can use labels = AUTO
+```
+
+<!-- git is distributed version control
+git = version control system
+GitHub = hosting platform for git where you can keep your files -->
+
+<!-- rmarkdown::render("filename.Rmd") is the command for rendering -->
